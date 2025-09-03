@@ -78,7 +78,23 @@ class APIIntegration:
 
 class AIPenetrationEngine:
     def __init__(self):
-        print(f"{Fore.GREEN}✅ AI Penetration Engine initialized{Style.RESET_ALL}")
+        self.client = None
+        self.services = {
+            'ai_engine': 'pentest-ai:latest',
+            'scanner': 'pentest-scanner:latest', 
+            'api_gateway': 'pentest-api:latest',
+            'database': 'pentest-db:latest'
+    }
+    
+        if DOCKER_AVAILABLE:
+            try:
+                self.client = docker.from_env()
+                # Test connection
+                self.client.ping()
+                print(f"{Fore.GREEN}✅ Docker client initialized{Style.RESET_ALL}")
+            except Exception as e:
+                print(f"{Fore.YELLOW}⚠️  Docker initialization failed: {e}{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}⚠️  Docker-based features will be disabled{Style.RESET_ALL}")
     
     def analyze_target(self, target):
         # Placeholder for AI analysis
@@ -258,11 +274,13 @@ class AIThreatIntelligence:
             self.tokenizer = AutoTokenizer.from_pretrained("microsoft/deberta-v3-base")
             self.nlp_model = AutoModelForSequenceClassification.from_pretrained(
                 "microsoft/deberta-v3-base", 
-                num_labels=5  # 5 threat levels
+                num_labels=5,  # 5 threat levels
+                ignore_mismatched_sizes=True  # Ignoriere Größenunterschiede
             )
             print(f"{Fore.GREEN}✅ AI Threat Intelligence models loaded{Style.RESET_ALL}")
         except Exception as e:
-            print(f"{Fore.RED}❌ Failed to load AI models: {e}{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}⚠️  Failed to load AI models: {e}{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}⚠️  AI analysis features will be limited{Style.RESET_ALL}")
             self.nlp_model = None
     
     async def query_threat_feed(self, feed_url, ioc_data):
@@ -468,6 +486,26 @@ class APTSimulationEngine:
             'lockheed_martin': self.load_kill_chain()
         }
         self.init_apt_db()
+    
+    def load_mitre_matrix(self):
+        """Load MITRE ATT&CK matrix data"""
+        return {
+            'reconnaissance': ['T1595', 'T1592', 'T1589', 'T1590'],
+            'resource_development': ['T1583', 'T1586', 'T1584', 'T1587'],
+            'initial_access': ['T1190', 'T1133', 'T1200', 'T1566']
+    }
+
+def load_kill_chain(self):
+    """Load Lockheed Martin Kill Chain"""
+    return {
+        'reconnaissance': ['Web footprinting', 'OSINT gathering'],
+        'weaponization': ['Malware creation', 'Exploit development'],
+        'delivery': ['Email phishing', 'Web drive-by'],
+        'exploitation': ['Code execution', 'Privilege escalation'],
+        'installation': ['Persistence mechanism', 'Backdoor installation'],
+        'command_control': ['C2 channel establishment', 'Beaconing'],
+        'actions_on_objectives': ['Data exfiltration', 'Destructive actions']
+    }
     
     def init_apt_db(self):
         """Initialize APT tactics database"""
@@ -931,14 +969,18 @@ class PenTestMultiToolEnterpriseUltimate:
     def check_admin_privileges(self):
         """Check if the tool is running with administrative privileges"""
         try:
+            admin_warning = False
             if os.name == 'nt':  # Windows
                 if ctypes.windll.shell32.IsUserAnAdmin() == 0:
-                    print(f"{Fore.RED}❌ WARNING: Not running as administrator! Some features may not work.{Style.RESET_ALL}")
-                    time.sleep(2)
+                    admin_warning = True
             else:  # Linux/Mac
                 if os.geteuid() != 0:
-                    print(f"{Fore.RED}❌ WARNING: Not running as root! Some features may not work.{Style.RESET_ALL}")
-                    time.sleep(2)
+                    admin_warning = True
+        
+            if admin_warning:
+                print(f"{Fore.YELLOW}⚠️  Not running with elevated privileges! Some features may not work.{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}⚠️  Consider running as administrator/root for full functionality{Style.RESET_ALL}")
+                time.sleep(2)
         except Exception as e:
             print(f"{Fore.YELLOW}⚠️  Could not check admin privileges: {e}{Style.RESET_ALL}")
 
