@@ -493,19 +493,19 @@ class APTSimulationEngine:
             'reconnaissance': ['T1595', 'T1592', 'T1589', 'T1590'],
             'resource_development': ['T1583', 'T1586', 'T1584', 'T1587'],
             'initial_access': ['T1190', 'T1133', 'T1200', 'T1566']
-    }
-
-def load_kill_chain(self):
-    """Load Lockheed Martin Kill Chain"""
-    return {
-        'reconnaissance': ['Web footprinting', 'OSINT gathering'],
-        'weaponization': ['Malware creation', 'Exploit development'],
-        'delivery': ['Email phishing', 'Web drive-by'],
-        'exploitation': ['Code execution', 'Privilege escalation'],
-        'installation': ['Persistence mechanism', 'Backdoor installation'],
-        'command_control': ['C2 channel establishment', 'Beaconing'],
-        'actions_on_objectives': ['Data exfiltration', 'Destructive actions']
-    }
+        }
+    
+    def load_kill_chain(self):
+        """Load Lockheed Martin Kill Chain"""
+        return {
+            'reconnaissance': ['Web footprinting', 'OSINT gathering'],
+            'weaponization': ['Malware creation', 'Exploit development'],
+            'delivery': ['Email phishing', 'Web drive-by'],
+            'exploitation': ['Code execution', 'Privilege escalation'],
+            'installation': ['Persistence mechanism', 'Backdoor installation'],
+            'command_control': ['C2 channel establishment', 'Beaconing'],
+            'actions_on_objectives': ['Data exfiltration', 'Destructive actions']
+        }
     
     def init_apt_db(self):
         """Initialize APT tactics database"""
@@ -528,8 +528,6 @@ def load_kill_chain(self):
             print(f"{Fore.GREEN}✅ APT database initialized: {self.tactics_db}{Style.RESET_ALL}")
         except Exception as e:
             print(f"{Fore.RED}❌ Failed to initialize APT database: {e}{Style.RESET_ALL}")
-    
-    # ... restliche Methoden bleiben gleich ...
 
 class DeepAnomalyDetection:
     def __init__(self):
