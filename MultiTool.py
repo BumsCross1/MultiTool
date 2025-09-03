@@ -55,17 +55,17 @@ import async_timeout
 
 # Add this near the top with other imports
 try:
-    import requests
-    REQUESTS_AVAILABLE = True
-except ImportError:
-    REQUESTS_AVAILABLE = False
-
-try:
     import urllib3
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     URLLIB3_AVAILABLE = True
 except ImportError:
     URLLIB3_AVAILABLE = False
+
+try:
+    import requests
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
 
 # Add these class definitions before the PenTestMultiToolEnterpriseUltimate class
 class APIIntegration:
@@ -88,9 +88,31 @@ class UserManager:
     def __init__(self):
         print(f"{Fore.GREEN}✅ User Manager initialized{Style.RESET_ALL}")
     
-    def authenticate_user(self, credentials):
-        # Placeholder for authentication
-        return True
+    def authenticate(self):
+        try:
+            import getpass
+        
+            # Für Entwicklung: Environment Variable oder Datei-based Auth
+            auth_token = os.getenv("PENTEST_AUTH_TOKEN")
+            if auth_token:
+                return True
+            
+            # Interaktive Authentifizierung
+            print(f"{Fore.YELLOW}🔐 Authentication Required{Style.RESET_ALL}")
+            password = getpass.getpass(f"{Fore.CYAN}Enter authorization password: {Style.RESET_ALL}")
+        
+            # Passwort-Hash verifizieren (in production: secure password hashing)
+            expected_hash = os.getenv("PENTEST_PASSWORD_HASH", "")
+            if expected_hash:
+                import hashlib
+                input_hash = hashlib.sha256(password.encode()).hexdigest()
+                return input_hash == expected_hash
+            
+            return password == os.getenv("PENTEST_PASSWORD", "default_secure_password_123!")
+        
+        except Exception as e:
+            print(f"{Fore.RED}❌ Authentication error: {e}{Style.RESET_ALL}")
+            return False
 
 class ZeroTrustSecurity:
     def __init__(self):
@@ -349,36 +371,56 @@ class QuantumCryptography:
         self.kyber = None
         self.dilithium = None
         self.falcon = None
+        self.encryption_key = Fernet.generate_key()  # 🔑 FEHLTE!
         self.init_quantum_crypto()
-    
-    def init_quantum_crypto(self):
-        """Initialize quantum-resistant cryptography"""
-        try:
-            # Placeholder for actual quantum-resistant algorithms
-            # In production, you would use libraries like liboqs or OpenQuantumSafe
-            print(f"{Fore.GREEN}✅ Quantum-resistant cryptography initialized{Style.RESET_ALL}")
-        except Exception as e:
-            print(f"{Fore.RED}❌ Quantum crypto init failed: {e}{Style.RESET_ALL}")
-    
+
+    # ENTFERNE die doppelten Methoden und ersetze durch:
+
     def post_quantum_encrypt(self, data):
-        """Quantum-resistant encryption"""
+        """Echte Verschlüsselung mit Fernet"""
         try:
-            # Simulate quantum-resistant encryption
             if isinstance(data, str):
                 data = data.encode('utf-8')
             
-            # In real implementation, use KYBER, DILITHIUM, or FALCON
-            public_key = os.urandom(32)
-            ciphertext = base64.b64encode(data).decode('utf-8')
+            f = Fernet(self.encryption_key)
+            ciphertext = f.encrypt(data)
             
             return {
-                'ciphertext': ciphertext,
-                'public_key': public_key.hex(),
-                'algorithm': 'QUANTUM-RESISTANT-AES'
+                'ciphertext': ciphertext.decode('utf-8'),
+                'algorithm': 'FERNET-AES-256'
             }
         except Exception as e:
-            print(f"{Fore.RED}❌ Quantum encryption failed: {e}{Style.RESET_ALL}")
+            print(f"{Fore.RED}❌ Encryption failed: {e}{Style.RESET_ALL}")
             return None
+
+    def post_quantum_decrypt(self, encrypted_data):
+        """Echte Entschlüsselung"""
+        try:
+            f = Fernet(self.encryption_key)
+            return f.decrypt(encrypted_data['ciphertext'].encode('utf-8')).decode('utf-8')
+        except Exception as e:
+            print(f"{Fore.RED}❌ Decryption failed: {e}{Style.RESET_ALL}")
+            return None
+
+def post_quantum_decrypt(self, encrypted_data, private_key):
+    """Echte Entschlüsselung"""
+    try:
+        from cryptography.fernet import Fernet
+        f = Fernet(self.encryption_key)
+        return f.decrypt(encrypted_data['ciphertext'].encode('utf-8')).decode('utf-8')
+    except Exception as e:
+        print(f"{Fore.RED}❌ Decryption failed: {e}{Style.RESET_ALL}")
+        return None
+
+def post_quantum_decrypt(self, encrypted_data, private_key):
+    """Echte Entschlüsselung"""
+    try:
+        from cryptography.fernet import Fernet
+        f = Fernet(self.encryption_key)
+        return f.decrypt(encrypted_data['ciphertext'].encode('utf-8')).decode('utf-8')
+    except Exception as e:
+        print(f"{Fore.RED}❌ Decryption failed: {e}{Style.RESET_ALL}")
+        return None
     
     def post_quantum_decrypt(self, encrypted_data, private_key):
         """Quantum-resistant decryption"""
@@ -623,29 +665,28 @@ class SecureMemoryManager:
         except Exception as e:
             print(f"{Fore.RED}❌ Secure memory init failed: {e}{Style.RESET_ALL}")
     
-    def secure_allocate(self, size, data):
-        """Secure memory allocation with encryption"""
-        if not self.secure_allocator:
-            return None
-        
-        try:
-            if isinstance(data, str):
-                data = data.encode('utf-8')
-            
-            # Encrypt data before storage
-            encrypted_data = base64.b64encode(data).decode('utf-8')
-            
-            # Find available space and store
-            available_pos = self.secure_allocator.find(b'\x00' * size)
-            if available_pos != -1:
-                self.secure_allocator.seek(available_pos)
-                self.secure_allocator.write(encrypted_data.encode('utf-8'))
-                return available_pos
-        
-        except Exception as e:
-            print(f"{Fore.RED}❌ Secure allocation failed: {e}{Style.RESET_ALL}")
-        
+def secure_allocate(self, size, data):
+    if not self.secure_allocator:
         return None
+    
+    try:
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        
+        # Echte Verschlüsselung statt Base64
+        f = Fernet(self.encryption_key)
+        encrypted_data = f.encrypt(data)
+        
+        available_pos = self.secure_allocator.find(b'\x00' * size)
+        if available_pos != -1:
+            self.secure_allocator.seek(available_pos)
+            self.secure_allocator.write(encrypted_data)
+            return available_pos
+            
+    except Exception as e:
+        print(f"{Fore.RED}❌ Secure allocation failed: {e}{Style.RESET_ALL}")
+    
+    return None
     
     def secure_retrieve(self, position, size):
         """Retrieve data from secure memory"""
@@ -724,8 +765,8 @@ class EnterpriseLogger:
                 print(f"{Fore.RED}❌ Log processing error: {e}{Style.RESET_ALL}")
     
     def get_session_id(self):
-        """Generate session ID"""
-        return hashlib.md5(str(time.time()).encode()).hexdigest()[:16]
+        import secrets
+        return secrets.token_hex(16)  # Sichere Session ID
     
     def realtime_metrics(self, metric_name, value, labels=None):
         """Realtime metrics for monitoring"""
@@ -937,7 +978,7 @@ class PenTestMultiToolEnterpriseUltimate:
         
         if not self.authenticate():
             print(f"{Fore.RED}❌ Unauthorized access! Tool will exit.{Style.RESET_ALL}")
-        sys.exit(1)
+            sys.exit(1)
             
         self.setup_environment()
         self.init_databases()
@@ -985,9 +1026,8 @@ class PenTestMultiToolEnterpriseUltimate:
         print()
     
     def authenticate(self):
-        """Simple authentication - override this for real authentication"""
-        # This is a placeholder - in a real tool, you would have proper authentication
-        return True
+        """Echte Authentifizierung"""
+        return self.user_manager.authenticate()
         
     def setup_environment(self):
         """Setup the tool environment"""
@@ -1104,28 +1144,6 @@ class PenTestMultiToolEnterpriseUltimate:
         print(f"{Fore.YELLOW}Web app auditor would start here{Style.RESET_ALL}")
         input(f"{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
         
-        
-        if not self.authenticate():
-            print(f"{Fore.RED}❌ Unauthorized access! Tool will exit.{Style.RESET_ALL}")
-        sys.exit(1)
-            
-        self.setup_environment()
-        self.init_databases()
-        self.load_vulnerability_db()
-        
-        # Initialize web dashboard in background
-        if FLASK_AVAILABLE:
-            self.web_dashboard = WebDashboard(self)
-            self.dashboard_thread = threading.Thread(target=self.web_dashboard.run)
-            self.dashboard_thread.daemon = True
-            self.dashboard_thread.start()
-        
-        self.is_keylogging = False
-        self.keystroke_count = 0
-        self.current_theme = "default"
-        self.command_history = []
-        self.history_index = -1
-        self.current_scans = {}
         
         # Start enterprise features
         self.start_enterprise_features()
