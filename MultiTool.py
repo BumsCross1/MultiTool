@@ -530,6 +530,44 @@ class APTSimulationEngine:
             print(f"{Fore.RED}❌ Failed to initialize APT database: {e}{Style.RESET_ALL}")
 
 class DeepAnomalyDetection:
+
+    def build_autoencoder(self):
+        """Build a simple autoencoder model for anomaly detection"""
+        try:
+            # Simple autoencoder architecture
+            class Autoencoder(nn.Module):
+                def __init__(self):
+                    super().__init__()
+                    self.encoder = nn.Sequential(
+                        nn.Linear(100, 50),
+                        nn.ReLU(),
+                        nn.Linear(50, 25),
+                        nn.ReLU(),
+                        nn.Linear(25, 10)
+                    )
+                    self.decoder = nn.Sequential(
+                        nn.Linear(10, 25),
+                        nn.ReLU(),
+                        nn.Linear(25, 50),
+                        nn.ReLU(),
+                        nn.Linear(50, 100),
+                        nn.Sigmoid()
+                    )
+            
+                def forward(self, x):
+                    encoded = self.encoder(x)
+                    decoded = self.decoder(encoded)
+                    return decoded
+        
+            model = Autoencoder()
+            print(f"{Fore.GREEN}✅ Autoencoder model built{Style.RESET_ALL}")
+            return model
+        
+        except Exception as e:
+            print(f"{Fore.YELLOW}⚠️  Failed to build autoencoder: {e}{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}⚠️  Anomaly detection will use statistical methods{Style.RESET_ALL}")
+            return None
+
     def __init__(self):
         # FIX: Database path creation
         data_dir = os.path.join(os.path.dirname(__file__), 'data')
